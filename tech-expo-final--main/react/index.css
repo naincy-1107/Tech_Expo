@@ -1,0 +1,6 @@
+/* index.css or main.css */
+@import "tailwindcss";
+body {
+  background-color: black;
+  color: black; /* optional */
+}
