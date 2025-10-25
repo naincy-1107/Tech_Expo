@@ -1,111 +1,3 @@
-
-// import { Box, useToast } from '@chakra-ui/react'
-// import React, { useRef, useState } from 'react'
-// import { Editor } from '@monaco-editor/react'
-// import Lang_selector from './Lang_selector'
-
-// import {CODE_SNIPPETS} from './constant.js'
-// import { executeCode } from './api.js'
-
-// const Codeeditor = () => {
-//   const editorRef = useRef()
-//   const [value, setValue] = useState('')
-//   const [language, setLanguage] = useState('Javascript')
-//   const [showTerminal, setShowTerminal] = useState(false)
-//   const [output, setOutput] = useState(null);
-//   const [isLoading, setIsLoading] = useState(false)
-//   const toast= useToast();
-//   const runCode = async ()=>{
-//     const sourceCode = value;
-//     if(!sourceCode)  return;
-//     try {
-//       setIsLoading(true)
-//       const {run: result}= await executeCode(language,sourceCode)
-//       setOutput(result.output.split("\n"))
-      
-//     } catch (error) {
-//             toast({
-//         title: "An error occurred.",
-//         description: error.message || "Unable to run code",
-//         status: "error",
-//         duration: 6000,
-//       });
-//     }
-//     finally{
-//       setIsLoading(false);
-//     }
-//   }
-
-//   const on_mount = (editor) => {
-//     editorRef.current = editor
-//     editor.focus()
-//   }
-
-//   const on_Select = (language) => {
-//     setLanguage(language)
-//     setValue(CODE_SNIPPETS[language])
-//   }
-
-//   return (
-//     <Box position="relative" w="100%" h="100%">
-//       {/* Language Selector + Run Button */}
-//    <Lang_selector 
-//   language={language} 
-//   onselect={on_Select} 
-//     onRun={() => {
-//     runCode()
-//     setShowTerminal(!showTerminal)  // ✅ toggle terminal state
-//   }}
-//   isLoading={isLoading}
-//   isTerminalOpen={showTerminal}
-// />
-
-//       {/* Editor */}
-//       <Editor
-//         height="85vh"
-//         width="50%"
-//         theme="vs-dark"
-//         language={language}
-//         defaultValue={CODE_SNIPPETS[language]}
-//         value={value}
-//         onChange={(val) => setValue(val)}
-//         onMount={on_mount}
-//       />
-
-//       {/* Terminal */}
-//       {showTerminal && (   //if showTerminal ==true then react renders the box
-//         <Box
-//           position="absolute"
-//           bottom="0"
-//           left="0"
-//           width="49%"
-//           height="40%"
-//           bg="black"
-//           color="green.300"
-//           p={4}
-//           fontFamily="monospace"
-//           overflowY="auto"
-//           borderTop="2px solid gray"
-//         >
-//           {/* <p>$ Output will appear here...</p> */}
-//         {output
-//   ? output.map((line, i) => {
-//       return <p key={i}>{line}</p>
-//     })
-//   : 'Click "Run Code" to see the output here'}
-
-//         </Box>
-//       )}
-//     </Box>
-//   )
-// }
-
-// export default Codeeditor
-
-
-// 
-
-
 import React, { useRef, useState, useEffect } from 'react';
 import { Box, useToast } from '@chakra-ui/react';
 import { Editor } from '@monaco-editor/react';
@@ -114,15 +6,23 @@ import Flowchart from './Flowchart.jsx';
 import { CODE_SNIPPETS } from './constant.js';
 import { executeCode } from './api.js';
 
+// Define the default language used for initialization
+const DEFAULT_LANGUAGE = 'javascript';
+
 const Codeeditor = () => {
   const editorRef = useRef();
-  const [value, setValue] = useState('');
-  const [language, setLanguage] = useState('Javascript');
+  // FIX 1: Initialize value with the default language's snippet
+  const [value, setValue] = useState(CODE_SNIPPETS[DEFAULT_LANGUAGE] || '');
+  // Initialize language with the default language
+  const [language, setLanguage] = useState(DEFAULT_LANGUAGE);
   const [showTerminal, setShowTerminal] = useState(false);
   const [output, setOutput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [flowData, setFlowData] = useState('');
+  // Flowchart data is derived from 'value' via useEffect, so we keep this state.
+  const [flowData, setFlowData] = useState(CODE_SNIPPETS[DEFAULT_LANGUAGE] || '');
   const toast = useToast();
+  // State for editor loading (addressing Issue 4)
+  const [isEditorLoading, setIsEditorLoading] = useState(true);
 
   // Run code in terminal
   const runCode = async () => {
@@ -133,9 +33,9 @@ const Codeeditor = () => {
       setIsLoading(true);
       const { run: result } = await executeCode(language, sourceCode);
       setOutput(result.output.split('\n'));
-
-      // Update flowchart when code runs
-      setFlowData(sourceCode);
+      
+      // Update flowchart when code runs (redundant due to useEffect, but harmless)
+      setFlowData(sourceCode); 
     } catch (error) {
       toast({
         title: 'An error occurred.',
@@ -148,19 +48,24 @@ const Codeeditor = () => {
     }
   };
 
-  // Set editor ref on mount
+  // Set editor ref on mount and indicate loading is complete
   const on_mount = (editor) => {
     editorRef.current = editor;
     editor.focus();
+    // Resolve Issue 4: Editor is mounted and ready
+    setIsEditorLoading(false); 
   };
 
   // Handle language selection
   const on_Select = (lang) => {
-    setLanguage(lang);
-    setValue(CODE_SNIPPETS[lang] || '');
+    // Ensure the language is stored as lowercase for consistency (Monaco and the API likely expect it)
+    const lowerLang = lang.toLowerCase();
+    setLanguage(lowerLang);
+    setValue(CODE_SNIPPETS[lowerLang] || '');
   };
 
   // Update flowchart live as user types
+  // This is better than triggering it only on 'run' for a live flow preview.
   useEffect(() => {
     setFlowData(value);
   }, [value]);
@@ -174,7 +79,8 @@ const Codeeditor = () => {
           onselect={on_Select}
           onRun={() => {
             runCode();
-            setShowTerminal(!showTerminal);
+            // Toggle terminal *after* attempting to run code
+            setShowTerminal(true); // Always show terminal on run for immediate feedback
           }}
           isLoading={isLoading}
           isTerminalOpen={showTerminal}
@@ -184,11 +90,15 @@ const Codeeditor = () => {
           height="70vh"
           width="100%"
           theme="vs-dark"
-          language={language.toLowerCase()}
-          defaultValue={CODE_SNIPPETS[language]}
+          // FIX 3: Use 'language' state directly (already lowercase)
+          language={language} 
+          // FIX 2: Added fallback for defaultValue
+          defaultValue={CODE_SNIPPETS[language] || CODE_SNIPPETS[DEFAULT_LANGUAGE]}
           value={value}
           onChange={(val) => setValue(val)}
           onMount={on_mount}
+          // FIX 4: Show a message while editor is loading
+          loading={isEditorLoading ? 'Loading Editor...' : undefined} 
         />
 
         {showTerminal && (
@@ -212,7 +122,8 @@ const Codeeditor = () => {
 
       {/* Right side: Flowchart */}
       <Box w="50%" h="100%" p={2} overflowY="auto">
-        <Flowchart code={value}  />
+        {/* Pass the code, which is being updated live via 'value' */}
+        <Flowchart code={flowData} /> 
       </Box>
     </Box>
   );
