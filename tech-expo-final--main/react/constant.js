@@ -8,26 +8,31 @@ export const LANGUAGE_VERSIONS = {
 }
 
 export const CODE_SNIPPETS = {
-  javascript: `console.log("Hello, JavaScript!");`,
+    // UPDATED: JavaScript snippet to include a function for better example quality
+    javascript: `function greet(name) {
+    return \`Hello, \${name}!\`;
+}
 
-  typescript: `function greet(name: string): string {
-  return \`Hello, \${name}!\`;
+console.log(greet("JavaScript"));`,
+
+    typescript: `function greet(name: string): string {
+    return \`Hello, \${name}!\`;
 }
 
 console.log(greet("TypeScript"));`,
 
-  python: `def greet(name):
+    python: `def greet(name):
     return f"Hello, {name}!"
 
 print(greet("Python"))`,
 
-  java: `public class Main {
+    java: `public class Main {
     public static void main(String[] args) {
         System.out.println("Hello, Java!");
     }
 }`,
 
-  csharp: `using System;
+    csharp: `using System;
 
 class Program {
     static void Main() {
@@ -35,7 +40,7 @@ class Program {
     }
 }`,
 
-  php: `<?php
+    php: `<?php
 echo "Hello, PHP!";
 ?>`
 };
