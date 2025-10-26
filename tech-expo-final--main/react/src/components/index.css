@@ -1,6 +1,13 @@
 /* index.css or main.css */
-@import "tailwindcss";
+
+/* Use the standard Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Set up the body styles */
 body {
   background-color: black;
-  color: black; /* optional */
+  /* FIX: Change text color to white for contrast against a black background */
+  color: white; 
 }
