@@ -1,4 +1,3 @@
-src/components/Editor/api.js/.gitkeep
 
 import axios from 'axios'
 import { LANGUAGE_VERSIONS } from './constant';
