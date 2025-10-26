@@ -1,13 +1,15 @@
 // src/Flowchart.jsx
 import React, { useEffect, useRef, useState } from "react";
-// FIX 1: Corrected import path case to match the source file name
 import mermaid from "mermaid";
-import { CodeToMermaid } from "./CodeToMermaid"; 
+import { CodeToMermaid } from "./CodeToMermaid";
 import { Box, Text } from "@chakra-ui/react";
 
-// Initialize mermaid once globally
-// Using theme 'dark' as specified in the original code, but 'neutral' is often safer for embedding.
-mermaid.initialize({ startOnLoad: false, theme: "dark" });
+// ✅ Initialize Mermaid globally with a consistent theme
+mermaid.initialize({
+  startOnLoad: false,
+  theme: "dark", // 'neutral' can also be used for better light/dark balance
+  securityLevel: "loose", // allows inline styles (safe for trusted inputs)
+});
 
 const Flowchart = ({ code }) => {
   const containerRef = useRef(null);
@@ -15,59 +17,55 @@ const Flowchart = ({ code }) => {
 
   useEffect(() => {
     let isCancelled = false;
-    
-    // FIX 2: Increased debounce delay for better performance (e.g., 500ms)
-    const debounceDelay = 500; 
-    
-    const handle = setTimeout(() => {
-      (async () => {
-        // FIX 3: Clean up previous render before attempting a new one
-        if (containerRef.current) {
-            containerRef.current.innerHTML = "";
+    const debounceDelay = 500;
+
+    const handle = setTimeout(async () => {
+      if (!containerRef.current) return;
+
+      // 🧹 Clear old SVG content
+      containerRef.current.innerHTML = "";
+
+      try {
+        // ✅ Convert user code → Mermaid diagram
+        const diagram = CodeToMermaid(code || "");
+        if (!diagram || typeof diagram !== "string") {
+          throw new Error("Invalid Mermaid diagram generated");
         }
-        
-        try {
-          const diagram = CodeToMermaid(code || "");
-          
-          // Generate a unique ID for the mermaid rendering process
-          const id = "flow_" + Math.random().toString(36).slice(2, 9);
 
-          // Render the SVG
-          const { svg } = await mermaid.render(id, diagram);
+        // ✅ Generate a unique ID for each render
+        const id = `flow_${Math.random().toString(36).slice(2, 9)}`;
 
-          if (!isCancelled && containerRef.current) {
-            containerRef.current.innerHTML = svg;
-          }
+        // ✅ Render the SVG via Mermaid API
+        const { svg } = await mermaid.render(id, diagram);
+
+        if (!isCancelled && containerRef.current) {
+          containerRef.current.innerHTML = svg;
           setError(null);
-        } catch (err) {
-          if (!isCancelled) {
-            // Note: If CodeToMermaid returns a diagram with a parse error node, 
-            // mermaid.render might still succeed. This only catches rendering errors.
-            setError(err.message || String(err));
-            if (containerRef.current) containerRef.current.innerHTML = "";
-          }
         }
-      })();
-    }, debounceDelay); // Debounce
+      } catch (err) {
+        if (!isCancelled) {
+          console.error("Mermaid render error:", err);
+          setError(err.message || "Unknown rendering error");
+          if (containerRef.current) containerRef.current.innerHTML = "";
+        }
+      }
+    }, debounceDelay);
 
+    // ✅ Cleanup on unmount or re-render
     return () => {
       isCancelled = true;
       clearTimeout(handle);
-      // FIX 3: Cleanup hook to clear the container when component unmounts or effect reruns
-      if (containerRef.current) {
-        containerRef.current.innerHTML = "";
-      }
+      if (containerRef.current) containerRef.current.innerHTML = "";
     };
   }, [code]);
 
   return (
     <Box>
       {error && (
-        <Text color="red.400" mb={2}>
+        <Text color="red.400" mb={2} fontSize="sm">
           Mermaid Render Error: {error}
         </Text>
       )}
-      {/* Mermaid renders into this div */}
       <div ref={containerRef} />
     </Box>
   );
