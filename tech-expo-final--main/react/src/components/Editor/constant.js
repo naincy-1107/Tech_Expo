@@ -1,46 +1,50 @@
-export const LANGUAGE_VERSIONS = {
-    javascript: "18.15.0",
-    typescript: "5.0.3",
-    python :"3.10.0",
-    java: "15.0.2",
-    csharp :"6.12.0",
-    php :"8.2.3"
-}
 
+// src/constant.js
+
+// Supported languages and their runtime versions
+export const LANGUAGE_VERSIONS = {
+  javascript: "18.15.0",
+  typescript: "5.0.3",
+  python: "3.10.0",
+  java: "15.0.2",
+  csharp: "6.12.0",
+  php: "8.2.3",
+};
+
+// Example code snippets for each language
 export const CODE_SNIPPETS = {
-    // UPDATED: JavaScript snippet to include a function for better example quality
-    javascript: `function greet(name) {
-    return \`Hello, \${name}!\`;
+  javascript: `function greet(name) {
+  return \`Hello, \${name}!\`;
 }
 
 console.log(greet("JavaScript"));`,
 
-    typescript: `function greet(name: string): string {
-    return \`Hello, \${name}!\`;
+  typescript: `function greet(name: string): string {
+  return \`Hello, \${name}!\`;
 }
 
 console.log(greet("TypeScript"));`,
 
-    python: `def greet(name):
+  python: `def greet(name):
     return f"Hello, {name}!"
 
 print(greet("Python"))`,
 
-    java: `public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello, Java!");
-    }
+  java: `public class Main {
+  public static void main(String[] args) {
+    System.out.println("Hello, Java!");
+  }
 }`,
 
-    csharp: `using System;
+  csharp: `using System;
 
 class Program {
-    static void Main() {
-        Console.WriteLine("Hello, C#!");
-    }
+  static void Main() {
+    Console.WriteLine("Hello, C#!");
+  }
 }`,
 
-    php: `<?php
+  php: `<?php
 echo "Hello, PHP!";
-?>`
+?>`,
 };
