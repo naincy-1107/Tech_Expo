@@ -1,12 +1,19 @@
+import {
+  Box,
+  Flex,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
+  Button,
+  Text,
+} from "@chakra-ui/react";
+import { LANGUAGE_VERSIONS } from "./constant.js";
 
-import { Box, Flex, Menu, MenuButton, MenuList, MenuItem, Button, Text } from "@chakra-ui/react"
-import { LANGUAGE_VERSIONS } from './constant.js'
-import Codeeditor from "./Codeeditor"
+const languages = Object.entries(LANGUAGE_VERSIONS);
+const active_color = "blue.400";
 
-const languages = Object.entries(LANGUAGE_VERSIONS)  
-const active_color= "blue.400"
-
-const Lang_selector = ({ language, onselect, onRun, isTerminalOpen , isLoading}) => {
+const LangSelector = ({ language, onSelect, onRun, isTerminalOpen, isLoading }) => {
   return (
     <Box ml={2} mb={2}>
       <Flex align="center" gap={3}>
@@ -21,17 +28,17 @@ const Lang_selector = ({ language, onselect, onRun, isTerminalOpen , isLoading})
               {languages.map(([lang, version]) => (
                 <MenuItem
                   key={lang}
-                  color={lang === language ? active_color : ""}
+                  color={lang === language ? active_color : "white"}
                   bg={lang === language ? "gray.700" : "transparent"}
                   _hover={{
                     color: active_color,
                     bg: "yellow.800",
                   }}
-                  onClick={() => onselect(lang)}
+                  onClick={() => onSelect(lang)}
                 >
                   {lang}
                   &nbsp;
-                  <Text as="span" color="gray.600" fontSize={"sm"}>
+                  <Text as="span" color="gray.400" fontSize="sm">
                     ({version})
                   </Text>
                 </MenuItem>
@@ -51,7 +58,8 @@ const Lang_selector = ({ language, onselect, onRun, isTerminalOpen , isLoading})
         </Button>
       </Flex>
     </Box>
-  )
-}
+  );
+};
 
-export default Lang_selector
+export default LangSelector;
+
